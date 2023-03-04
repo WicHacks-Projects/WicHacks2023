@@ -24,10 +24,17 @@ hands = mp_hands.Hands(
 canvas_width = 640
 canvas_height = 480
 canvas = np.zeros((canvas_height, canvas_width, 3), dtype=np.uint8)
-
+# Define parameters for the hand movement generator
+num_fingers = 5
+num_joints_per_finger = 4
+max_joint_angle = np.pi / 4  # Maximum angle for each joint in radians
 # Define function to generate random hand movements
 def generate_hand_movement():
-    # Code to generate random hand movements goes here
+    # Generate random joint angles for each finger
+    joint_angles = np.random.uniform(-max_joint_angle, max_joint_angle, size=(num_fingers, num_joints_per_finger))
+
+    # Flatten the joint angles into a 20-element array
+    hand_movement = joint_angles.flatten()
     return hand_movement
 
 # Define route for the main page
