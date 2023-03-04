@@ -69,7 +69,7 @@ def gen():
 # Define route for the video stream
 @app.route('/video_feed')
 def video_feed():
-    return Response(video_feed(),
+    return Response(gen(),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
