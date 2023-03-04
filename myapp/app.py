@@ -11,11 +11,11 @@ app = Flask(__name__)
 
 @app.route('/')
 def home():
-    print('home')
-    return render_template('/myapp/templates/home.html')
+    return render_template('home.html')
 
 
 if __name__ == '__main__':
+    app.secret_key = 'mysecretkey'
     app.run()
     
     
