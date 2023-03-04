@@ -36,7 +36,7 @@ def index():
     return render_template('home.html')
 
 # Define route for the video feed
-def video_feed():
+def gen():
     while True:
         # Get the hand landmarks from the camera
         ret, frame = cap.read()
@@ -70,6 +70,6 @@ def video_feed():
 
 if __name__ == '__main__':
     app.secret_key = 'mysecretkey'
-    app.run()
+    app.run(debug=True)
     
     
