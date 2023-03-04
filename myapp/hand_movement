@@ -13,13 +13,27 @@ hands = mp_hands.Hands(
 )
 
 # Define parameters for the canvas
+num_fingers = 5
+num_joints_per_finger = 4  # Pointer finger has 3 joints
+max_joint_angle = np.pi / 4  # Maximum angle for each joint in radians
+
+
 canvas_width = 640
 canvas_height = 480
 canvas = np.zeros((canvas_height, canvas_width, 3), dtype=np.uint8)
 
 # Define function to generate random hand movements
-def generate_hand_movement():
-    # Code to generate random hand movements goes here
+def generate_pointer_movement():
+    # Generate random joint angles for the pointer finger
+    joint_angles = np.zeros((num_fingers, num_joints_per_finger))
+
+    # Generate random joint angles for the pointer finger
+    pointer_joint_angles = np.random.uniform(-max_joint_angle, max_joint_angle, size=num_joints_per_finger)
+    joint_angles[1] = pointer_joint_angles
+
+    # Flatten the joint angles into a 20-element array
+    hand_movement = joint_angles.flatten()
+
     return hand_movement
 
 # Main loop for generating hand movements and drawing on the canvas
@@ -36,7 +50,7 @@ while True:
             mp_drawing.draw_landmarks(canvas, hand_landmarks, mp_hands.HAND_CONNECTIONS)
 
     # Generate a new hand movement and draw it on the canvas
-    hand_movement = generate_hand_movement()
+    hand_movement = generate_pointer_movement()
     # Code to use the hand movement to draw on the canvas goes here
 
     # Display the canvas
