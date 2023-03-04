@@ -72,9 +72,6 @@ def video_feed():
     return Response(gen(),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
-cap = cv2.VideoCapture(0)
-
-
 if __name__ == '__main__':
     app.secret_key = 'mysecretkey'
     app.run(debug=True)
