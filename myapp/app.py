@@ -33,7 +33,7 @@ def generate_hand_movement():
 # Define route for the main page
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('home.html')
 
 # Define route for the video feed
 def video_feed():
@@ -65,9 +65,7 @@ def video_feed():
     return Response(video_feed(),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
-@app.route('/')
-def home():
-    return render_template('home.html')
+
 
 
 if __name__ == '__main__':
