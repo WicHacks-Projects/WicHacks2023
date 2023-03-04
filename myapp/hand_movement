@@ -1,5 +1,6 @@
 import numpy as np
 import cv2
+import cap
 import mediapipe as mp
 
 # Define parameters for the hand tracker and gesture recognition
