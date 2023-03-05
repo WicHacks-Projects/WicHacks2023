@@ -86,7 +86,7 @@ while True:
 
     # Clear the canvas and video feed when 'c' is pressed
     if cv2.waitKey(1) == ord('c'):
-        canvas.fill(0)  # Clear the canvas to white
+        canvas.fill(0)  # Clear the canvas to black
         prev_x, prev_y = 0, 0  # Reset the previous point
 
 # Release the resources
