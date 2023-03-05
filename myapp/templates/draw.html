@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Hand Tracking and Drawing</title>
+  </head>
+  <body>
+    <h1>Hand Tracking and Drawing</h1>
+    <video id="video_feed" width="640" height="480" autoplay></video>
+    <canvas id="drawing_canvas" width="640" height="480"></canvas>
+    
+    <script>
+      // get the video element and the drawing canvas
+      const video = document.getElementById('video_feed');
+      const canvas = document.getElementById('drawing_canvas');
+      
+      // set up the video stream source
+      video.src = "{{ url_for('video_feed') }}";
+      video.addEventListener('loadedmetadata', () => {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+      });
+    </script>
+  </body>
+</html>
