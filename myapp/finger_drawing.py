@@ -14,8 +14,10 @@ hands = mp_hands.Hands(static_image_mode=False, max_num_hands=1, min_detection_c
 frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
 frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
-# Initialize the drawing canvas, color, and the previous point
 canvas = np.zeros((frame_height, frame_width, 3), dtype=np.uint8)
+canvas[..., 0] = 255  # Set the canvas to blue
+canvas[..., 1] = 255  # Set the canvas to green
+canvas[..., 2] = 0  # Set the canvas to yellow (swap red and blue channels)
 canvas.fill(0)  # Set the canvas to white
 color = (0, 0, 255)  # Set the default color to red
 prev_x, prev_y = 0, 0
@@ -51,10 +53,10 @@ while True:
             # Connect the finger tip with the previous point
             if prev_x != 0 and prev_y != 0 and drawing:
                 if drawing and not erasing:
-                    cv2.line(canvas, (prev_x, prev_y), (cx, cy), color, thickness=5)
+                    cv2.line(canvas, (prev_x, prev_y), (cx, cy), (color[2], color[1], color[0]), thickness=20)
                 elif erasing:
                     # Use a white color to simulate erasing
-                    cv2.line(canvas, (prev_x, prev_y), (cx, cy), (0,0, 0), thickness=20)
+                    cv2.line(canvas, (prev_x, prev_y), (cx, cy), (0, 0, 0), thickness=20)
 
             # Update previous point to current point
             prev_x, prev_y = cx, cy
@@ -99,8 +101,14 @@ while True:
 
     # Clear the canvas and video feed when 'c' is pressed
     if cv2.waitKey(1) == ord('c'):
-        canvas.fill(0)  # Clear the canvas to black
-        prev_x, prev_y = 0, 0  # Reset the previous point
+        # Initialize the drawing canvas, color, and the previous point
+        canvas = np.zeros((frame_height, frame_width, 3), dtype=np.uint8)
+        canvas[..., 0] = 255  # Set the canvas to blue
+        canvas[..., 1] = 255  # Set the canvas to green
+        canvas[..., 2] = 0  # Set the canvas to yellow (swap red and blue channels)
+        canvas.fill(0)  # Set the canvas to white
+        color = (0, 0, 255)  # Set the default color to red
+        prev_x, prev_y = 0, 0
 
 # Release the resources
 cap.release()
