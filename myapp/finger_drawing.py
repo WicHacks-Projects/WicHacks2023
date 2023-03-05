@@ -48,17 +48,25 @@ while True:
             cx, cy = int(finger_tip.x * frame_width), int(finger_tip.y * frame_height)
             
             # Connect the finger tip with the previous point
-            if prev_x != 0 and prev_y != 0:
+            if prev_x != 0 and prev_y != 0 and drawing:
                 cv2.line(canvas, (prev_x, prev_y), (cx, cy), color, thickness=5)
 
             # Update previous point to current point
             prev_x, prev_y = cx, cy
 
+             # Check if the hand is pinching
+            thumb_tip = hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_TIP]
+            thumb_x, thumb_y = int(thumb_tip.x * frame_width), int(thumb_tip.y * frame_height)
+            dist = np.sqrt((cx - thumb_x)**2 + (cy - thumb_y)**2)
+            if dist < 60:
+                drawing = False  # Stop drawing when pinching
+            else:
+                drawing = True  # Resume drawing when not pinching
+
             # Check if the hand is making a fist
             if hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_MCP].x > hand_landmarks.landmark[mp_hands.HandLandmark.WRIST].x and hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_MCP].y < hand_landmarks.landmark[mp_hands.HandLandmark.WRIST].y and hand_landmarks.landmark[mp_hands.HandLandmark.MIDDLE_FINGER_MCP].y < hand_landmarks.landmark[mp_hands.HandLandmark.WRIST].y and hand_landmarks.landmark[mp_hands.HandLandmark.RING_FINGER_MCP].y < hand_landmarks.landmark[mp_hands.HandLandmark.WRIST].y and hand_landmarks.landmark[mp_hands.HandLandmark.PINKY_MCP].y < hand_landmarks.landmark[mp_hands.HandLandmark.WRIST].y:
                 # Open a color picker when the hand makes a fist
                 color = colorchooser.askcolor()[0] 
-
             else:
                 color_picker_open = False
 
@@ -78,7 +86,7 @@ while True:
 
     # Clear the canvas and video feed when 'c' is pressed
     if cv2.waitKey(1) == ord('c'):
-        canvas.fill(255)  # Clear the canvas to white
+        canvas.fill(0)  # Clear the canvas to white
         prev_x, prev_y = 0, 0  # Reset the previous point
 
 # Release the resources
