@@ -33,17 +33,12 @@ canvas = np.zeros((canvas_height, canvas_width, 3), dtype=np.uint8)
 # Define route for the video feed
 def gen():
     while True:
-        # Get the hand landmarks from the camera
         ret, frame = cap.read()
-        
-        if not ret:
-            break
-        else:
-        # Display the canvas
-            ret, buffer = cv2.imencode('.jpg', frame)
-            frame = buffer.tobytes()
-            yield (b'--frame\r\n'
-                    b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+        # your existing code for processing the frame and updating the canvas
+        # yield the canvas as a JPEG image
+        frame = cv2.imencode('.jpg', canvas)[1].tobytes()
+        yield (b'--frame\r\n'
+               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
         
 # Define route for the main page
 @app.route('/')
@@ -51,7 +46,7 @@ def index():
     return render_template('home.html')
 
 # Define route for the video stream
-@app.route('/video_feed')
+@app.route('/draw')
 def video_feed():
     return Response(gen(),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
