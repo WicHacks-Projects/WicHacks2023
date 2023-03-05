@@ -31,6 +31,11 @@ while True:
     
     # Convert the frame to RGB for hand tracking
     frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+    img = cv2.hconcat([canvas, frame])
+    
+    # Show the combined image
+    cv2.imshow("Canvas and Video Feed", img)
     
     # Detect the hand landmarks in the frame
     results = hands.process(frame_rgb)
@@ -84,24 +89,15 @@ while True:
             else:
                 erasing = True
     
-    # Show the canvas in a separate window
-    cv2.imshow('Canvas', canvas)
-    
-    # Combine the frame and the canvas
-    frame_with_canvas = cv2.add(frame, canvas)
-    
-    # Show the webcam feed in a separate window
-    cv2.imshow('Webcam', frame_with_canvas)
-    
-    # Quit the program if 'q' is pressed
-    if cv2.waitKey(1) == ord('q'):
+    # Show the canvas and the video feed
+    cv2.imshow("Canvas and Video Feed", img)
+    # Check for key events
+    key = cv2.waitKey(1)
+    if key == ord("q"):  # Quit the program
         break
+    elif key == ord("c"):  # Clear the canvas
+        canvas.fill(0)
 
-    # Clear the canvas and video feed when 'c' is pressed
-    if cv2.waitKey(1) == ord('c'):
-        canvas.fill(0)  # Clear the canvas to black
-        prev_x, prev_y = 0, 0  # Reset the previous point
-
-# Release the resources
+# Release the video capture object and destroy the windows
 cap.release()
 cv2.destroyAllWindows()
