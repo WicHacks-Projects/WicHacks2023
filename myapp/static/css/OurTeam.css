@@ -37,6 +37,11 @@ body {
     margin-bottom: 10px;
     border-radius: 50%;
   }
+  div.image {
+    width:10px;
+    height:10px;
+    ;
+    }
   
   .team-member h2 {
     margin-top: 0;

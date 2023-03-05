@@ -2,7 +2,7 @@ from tkinter import colorchooser
 import cv2
 import numpy as np
 import mediapipe as mp
-from flask import Flask, Response, render_template, jsonify
+from flask import Flask, Response, render_template
 import time
 
 app = Flask(__name__)
@@ -11,7 +11,6 @@ app = Flask(__name__)
 mp_hands = mp.solutions.hands
 hands = mp_hands.Hands(static_image_mode=False, max_num_hands=1, min_detection_confidence=0.5)
 
-cx, cy = 0, 0
 
 # Get the frame size
 cap = cv2.VideoCapture(0)
@@ -54,12 +53,7 @@ def gen_frames():
                 # Draw the landmarks and connect them with lines
                 finger_tip = hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP]
                 cx, cy = int(finger_tip.x * frame_width), int(finger_tip.y * frame_height)
-<<<<<<< HEAD
-                print(cx)
-                print(cy)
-=======
             
->>>>>>> bb49f3ec3fd5fa7a9ad64d20354b3588fdfc5db4
                 # Connect the finger tip with the previous point
                 if prev_x != 0 and prev_y != 0:
                     cv2.line(canvas, (prev_x, prev_y), (cx, cy), color, thickness=5)
@@ -97,21 +91,12 @@ def gen_frames():
 def index():
     return render_template('home.html')
 
-@app.route('/ourteam')
-def ourteam():
-    return render_template('OurTeam.html')
-
-@app.route('/generate')
-def generate():
-    return render_template('Generate.html')
-    
 @app.route('/draw')
 def draw():
     return Response(gen_frames(),
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
 if __name__ == '__main__':
-    
     app.run(debug=True)
 
 

@@ -8,32 +8,36 @@ cap = cv2.VideoCapture(0)
 
 # Initialize the hand tracking module
 mp_hands = mp.solutions.hands
-hands = mp_hands.Hands(static_image_mode=False, max_num_hands=2, min_detection_confidence=0.5)
+hands = mp_hands.Hands(static_image_mode=False, max_num_hands=1, min_detection_confidence=0.7)
 
 # Get the frame size
 frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
 frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
-# Initialize the drawing canvas, color, and the previous point
 canvas = np.zeros((frame_height, frame_width, 3), dtype=np.uint8)
-canvas[..., 0] = 0  # Set the canvas to black
-canvas[..., 1] = 0  # Set the canvas to black
-canvas[..., 2] = 0  # Set the canvas to black
+canvas[..., 0] = 255  # Set the canvas to blue
+canvas[..., 1] = 255  # Set the canvas to green
+canvas[..., 2] = 0  # Set the canvas to yellow (swap red and blue channels)
+canvas.fill(0)  # Set the canvas to white
 color = (0, 0, 255)  # Set the default color to red
 prev_x, prev_y = 0, 0
 
 drawing = True
-color_picker_open = False
+erasing = False
 while True:
     # Capture a frame from the video feed
     ret, frame = cap.read()
     
     # Flip the frame horizontally (mirror effect)
     frame = cv2.flip(frame, 1)
-     # Resize the canvas to match the size of the frame
-    canvas_resized = cv2.resize(canvas, (frame_width, frame_height))
-
+    
+    # Convert the frame to RGB for hand tracking
     frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+    img = cv2.hconcat([canvas, frame])
+    
+    # Show the combined image
+    cv2.imshow("Canvas and Video Feed", img)
     
     # Detect the hand landmarks in the frame
     results = hands.process(frame_rgb)
@@ -41,58 +45,60 @@ while True:
     # Draw the landmarks and connect them with lines
     if results.multi_hand_landmarks:
         for hand_landmarks in results.multi_hand_landmarks:
-            thumb_tip = hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_TIP]
-            index_finger_tip = hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP]
-            middle_finger_tip = hand_landmarks.landmark[mp_hands.HandLandmark.MIDDLE_FINGER_TIP]
-            ring_finger_tip = hand_landmarks.landmark[mp_hands.HandLandmark.RING_FINGER_TIP]
-            pinky_tip = hand_landmarks.landmark[mp_hands.HandLandmark.PINKY_TIP]
-            pinky_mcp = hand_landmarks.landmark[mp_hands.HandLandmark.PINKY_MCP]
-
-            if thumb_tip.x < pinky_mcp.x:
-                hand = "right"
-            else:
+            # Check if the hand is the left or right
+            if hand_landmarks.landmark[mp_hands.HandLandmark.WRIST].x < hand_landmarks.landmark[mp_hands.HandLandmark.PINKY_MCP].x:
                 hand = "left"
-
+            else:
+                hand = "right"
+                
             # Draw the landmarks and connect them with lines
             finger_tip = hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP]
             cx, cy = int(finger_tip.x * frame_width), int(finger_tip.y * frame_height)
             
             # Connect the finger tip with the previous point
-            if prev_x != 0 and prev_y != 0:
-                cv2.line(canvas, (prev_x, prev_y), (cx, cy), (color[2], color[1], color[0]), thickness=5)
+            if prev_x != 0 and prev_y != 0 and drawing:
+                if drawing and not erasing:
+                    cv2.line(canvas, (prev_x, prev_y), (cx, cy), (color[2], color[1], color[0]), thickness=20)
+                elif erasing:
+                    # Use a white color to simulate erasing
+                    cv2.line(canvas, (prev_x, prev_y), (cx, cy), (0, 0, 0), thickness=20)
 
             # Update previous point to current point
             prev_x, prev_y = cx, cy
-            if (thumb_tip.x < index_finger_tip.x and
-                thumb_tip.x < middle_finger_tip.x and
-                thumb_tip.x < ring_finger_tip.x and
-                thumb_tip.x < pinky_tip.x and
-                thumb_tip.y > index_finger_tip.y and
-                thumb_tip.y > middle_finger_tip.y and
-                thumb_tip.y > ring_finger_tip.y and
-                thumb_tip.y > pinky_tip.y):
-                
-                color = colorchooser.askcolor()[0]
-                color = tuple([int(c) for c in color]) # convert the color values to integers and create a tuple
+
+             # Check if the hand is pinching
+            thumb_tip = hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_TIP]
+            thumb_x, thumb_y = int(thumb_tip.x * frame_width), int(thumb_tip.y * frame_height)
+            dist = np.sqrt((cx - thumb_x)**2 + (cy - thumb_y)**2)
+            if dist < 60:
+                drawing = False  # Stop drawing when pinching
+            else:
+                drawing = True  # Resume drawing when not pinching
+
+            # Check if the hand is making a fist
+            if hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_MCP].x > hand_landmarks.landmark[mp_hands.HandLandmark.WRIST].x and hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_MCP].y < hand_landmarks.landmark[mp_hands.HandLandmark.WRIST].y and hand_landmarks.landmark[mp_hands.HandLandmark.MIDDLE_FINGER_MCP].y < hand_landmarks.landmark[mp_hands.HandLandmark.WRIST].y and hand_landmarks.landmark[mp_hands.HandLandmark.RING_FINGER_MCP].y < hand_landmarks.landmark[mp_hands.HandLandmark.WRIST].y and hand_landmarks.landmark[mp_hands.HandLandmark.PINKY_MCP].y < hand_landmarks.landmark[mp_hands.HandLandmark.WRIST].y:
+                # Open a color picker when the hand makes a fist
+                color = colorchooser.askcolor()[0] 
             else:
                 color_picker_open = False
-                color_picker_open = False
 
-    # Show the canvas in a separate window
-    cv2.imshow('Canvas', canvas)
+            # Check if the thumb is down for erasing
+            # Check if the hand is making a thumbs down gesture
+            if hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_MCP].y < hand_landmarks.landmark[mp_hands.HandLandmark.WRIST].y and \
+                hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_IP].y < hand_landmarks.landmark[mp_hands.HandLandmark.WRIST].y and \
+                hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_TIP].y < hand_landmarks.landmark[mp_hands.HandLandmark.WRIST].y:
+                erasing = False
+            else:
+                erasing = True
     
-    # Combine the frame and the canvas
-    frame_with_canvas = cv2.add(frame, canvas_resized)
-    
-    # Show the webcam feed in a separate window
-    cv2.imshow('Webcam', frame_with_canvas)
-    
-    # Quit the program if 'q' is pressed
-    if cv2.waitKey(1) == ord('q'):
+    # Show the canvas and the video feed
+    cv2.imshow("Canvas and Video Feed", img)
+    # Check for key events
+    key = cv2.waitKey(1)
+    if key == ord("q"):  # Quit the program
         break
-
-    # Clear the canvas and video feed when 'c' is pressed
-    if cv2.waitKey(1) == ord('c'):
+    elif key == ord("c"):  # Clear the canvas
+        # Initialize the drawing canvas, color, and the previous point
         canvas = np.zeros((frame_height, frame_width, 3), dtype=np.uint8)
         canvas[..., 0] = 255  # Set the canvas to blue
         canvas[..., 1] = 255  # Set the canvas to green
@@ -100,6 +106,7 @@ while True:
         canvas.fill(0)  # Set the canvas to white
         color = (0, 0, 255)  # Set the default color to red
         prev_x, prev_y = 0, 0
-# Release the resources
+
+# Release the video capture object and destroy the windows
 cap.release()
-cv2.destroyAllWindows() 
+cv2.destroyAllWindows()
