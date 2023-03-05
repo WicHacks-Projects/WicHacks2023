@@ -1,23 +1,22 @@
 import cv2
 import numpy as np
 import mediapipe as mp
-import tkinter.colorchooser as colorchooser
 
 # Initialize the video capture object
 cap = cv2.VideoCapture(0)
 
 # Initialize the hand tracking module
 mp_hands = mp.solutions.hands
-hands = mp_hands.Hands(static_image_mode=False, max_num_hands=1, min_detection_confidence=0.7)
+hands = mp_hands.Hands(static_image_mode=False, max_num_hands=10, min_detection_confidence=0.5)
 
 # Get the frame size
 frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
 frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 
-# Initialize the drawing canvas, color, and the previous point
+# Initialize the drawing canvas and the previous point
 canvas = np.zeros((frame_height, frame_width, 3), dtype=np.uint8)
 canvas.fill(0)  # Set the canvas to white
-color = (0, 0, 255)  # Set the default color to red
+
 prev_x, prev_y = 0, 0
 
 while True:
@@ -48,18 +47,11 @@ while True:
             
             # Connect the finger tip with the previous point
             if prev_x != 0 and prev_y != 0:
-                cv2.line(canvas, (prev_x, prev_y), (cx, cy), color, thickness=5)
+                cv2.line(canvas, (prev_x, prev_y), (cx, cy), (0, 0, 255), thickness=5)
 
             # Update previous point to current point
             prev_x, prev_y = cx, cy
-
-            # Check if the hand is making a fist
-            if hand_landmarks.landmark[mp_hands.HandLandmark.THUMB_MCP].x > hand_landmarks.landmark[mp_hands.HandLandmark.WRIST].x and hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_MCP].y < hand_landmarks.landmark[mp_hands.HandLandmark.WRIST].y and hand_landmarks.landmark[mp_hands.HandLandmark.MIDDLE_FINGER_MCP].y < hand_landmarks.landmark[mp_hands.HandLandmark.WRIST].y and hand_landmarks.landmark[mp_hands.HandLandmark.RING_FINGER_MCP].y < hand_landmarks.landmark[mp_hands.HandLandmark.WRIST].y and hand_landmarks.landmark[mp_hands.HandLandmark.PINKY_MCP].y < hand_landmarks.landmark[mp_hands.HandLandmark.WRIST].y:
-                # Open a color picker when the hand makes a fist
-                color = colorchooser.askcolor()[0] 
-
-            else:
-                color_picker_open = False
+    
     
     # Show the canvas in a separate window
     cv2.imshow('Canvas', canvas)
@@ -74,9 +66,9 @@ while True:
     if cv2.waitKey(1) == ord('q'):
         break
 
-    # Clear the canvas and video feed when 'c' is pressed
+    # Clear the canvas and video feed when a key is pressed
     if cv2.waitKey(1) == ord('c'):
-        canvas.fill(255)  # Clear the canvas to white
+        canvas.fill(0)  # Clear the canvas to black
         prev_x, prev_y = 0, 0  # Reset the previous point
 
 # Release the resources
