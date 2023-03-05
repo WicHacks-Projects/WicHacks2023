@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 import mediapipe as mp
-from flask import Flask, Response, render_template
+from flask import Flask, Response, render_template, jsonify
 import time
 
 app = Flask(__name__)
@@ -10,6 +10,7 @@ app = Flask(__name__)
 mp_hands = mp.solutions.hands
 hands = mp_hands.Hands(static_image_mode=False, max_num_hands=1, min_detection_confidence=0.5)
 
+cx, cy = 0, 0
 
 # Get the frame size
 cap = cv2.VideoCapture(0)
@@ -50,7 +51,8 @@ def gen_frames():
                 # Draw the landmarks and connect them with lines
                 finger_tip = hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP]
                 cx, cy = int(finger_tip.x * frame_width), int(finger_tip.y * frame_height)
-
+                print(cx)
+                print(cy)
                 # Connect the finger tip with the previous point
                 if prev_x != 0 and prev_y != 0:
                     cv2.line(canvas, (prev_x, prev_y), (cx, cy), (0, 0, 255), thickness=5)
