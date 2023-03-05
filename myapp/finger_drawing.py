@@ -20,6 +20,7 @@ canvas.fill(0)  # Set the canvas to white
 color = (0, 0, 255)  # Set the default color to red
 prev_x, prev_y = 0, 0
 
+drawing = True
 while True:
     # Capture a frame from the video feed
     ret, frame = cap.read()
@@ -60,6 +61,7 @@ while True:
 
             else:
                 color_picker_open = False
+
     
     # Show the canvas in a separate window
     cv2.imshow('Canvas', canvas)
