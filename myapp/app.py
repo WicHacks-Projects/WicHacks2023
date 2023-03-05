@@ -76,9 +76,17 @@ def gen_frames():
                 prev_x, prev_y = 0, 0  # Reset the previous point
 
 @app.route('/')
-def index():
+def home():
     return render_template('home.html')
 
+@app.route('/ourteam')
+def ourteam():
+    return render_template('OurTeam.html')
+
+@app.route('/generate')
+def generate():
+    return render_template('Generate.html')
+    
 @app.route('/draw')
 def draw():
     return Response(gen_frames(),
