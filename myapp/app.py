@@ -88,7 +88,7 @@ def gen_frames():
                 break
 
 @app.route('/')
-def home():
+def index():
     return render_template('home.html')
 
 @app.route('/ourteam')
